@@ -29,6 +29,8 @@ export class User {
   get u() {return this.auth.currentUser};
   authInit: Promise<any>;
 
+  unsubGame?: () => any;
+
   constructor(name:string, emulator = true) {
     this.app = initializeApp(firebaseConfig, name);
     this.db = getFirestore(this.app);
@@ -52,8 +54,11 @@ export class User {
   };
 
   subGame = (id: string, func: (game: TicTacToe) => any) => {
+    if (this.unsubGame)
+      this.unsubGame();
+
     const gameDoc = doc(this.db, 'games/'+id);
-    onSnapshot(gameDoc, doc => {
+    this.unsubGame = onSnapshot(gameDoc, doc => {
       const data = doc.data();
       func(data as TicTacToe);
     });

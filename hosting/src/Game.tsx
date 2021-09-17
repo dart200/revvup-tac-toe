@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import Button from '@mui/lab/LoadingButton';
 import AddCircle from '@mui/icons-material/AddCircle';
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -9,23 +10,45 @@ import {User, TicTacToe} from './firebase';
 
 const Game = (args: {user: User}) => {
   const {user} = args;
+
   const [loadingNew, setLoadingNew] = useState(false);
   const [gameId, setGameId] = useState('');
   const [gameData, setGameData] = useState<TicTacToe|null>(null);
 
+  const [joinId, setJoinId] = useState('');
+  const [loadingJoin, setLoadingJoin] = useState(false);
+
   const onNewGame = async () => {
-    if (loadingNew) return;
+    if (loadingNew || loadingJoin) return;
 
     setLoadingNew(true);
+
     const {gameId} = await user.newGame();
     console.log('gameId', gameId);
     setGameId(gameId);
+
     user.subGame(gameId, (g: TicTacToe) => {
       console.log('on snapshot', g);
       setGameData(g);
       setLoadingNew(false);
     });
   };
+
+  const onChangeJoinId = (evt: any) => {
+    setJoinId(evt.target.value);
+  }
+
+  const onJoinGame = () => {
+    if (loadingNew || loadingJoin) return;
+    if (!joinId) return;
+
+    setLoadingJoin(true);
+    user.subGame(joinId, (g: TicTacToe) => {
+      console.log('on join snap', g);
+      setGameData(g);
+      setLoadingJoin(false);
+    })
+  }
 
   return <>
     {gameData && <>
@@ -53,9 +76,23 @@ const Game = (args: {user: User}) => {
         New Game
       </Button>
       <div className="gameid-div">
-        <Button variant="contained">Join</Button>
+        <Button 
+          variant="contained"
+          onClick={onJoinGame}
+          loading={loadingNew}
+          loadingPosition="start"
+          startIcon={<VideogameAssetIcon />}
+          disabled={false}>
+          Join
+        </Button>
         <div className="gameid-text-div">
-          <TextField fullWidth id="standard-basic" placeholder="Game ID" variant="standard" />
+          <TextField 
+            fullWidth
+            id="standard-basic"
+            placeholder="Game ID"
+            variant="standard"
+            value={joinId}
+            onChange={onChangeJoinId}/>
         </div>
       </div>
     </div>
