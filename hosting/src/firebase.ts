@@ -1,7 +1,7 @@
 import {FirebaseApp, initializeApp} from 'firebase/app';
 import {Auth, getAuth, connectAuthEmulator, signInAnonymously} from 'firebase/auth';
 import {Functions, getFunctions, connectFunctionsEmulator, httpsCallable} from 'firebase/functions';
-import {Firestore, getFirestore, connectFirestoreEmulator, doc} from 'firebase/firestore';
+import {Firestore, getFirestore, connectFirestoreEmulator, doc, onSnapshot} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyCbv6Xl3kCnzeFJ_CFPU0Ckx2D5HcBZTQc",
@@ -13,8 +13,14 @@ const firebaseConfig = {
   measurementId: "G-8LT446PTNB"
 };
 
+export interface TicTacToe {
+  userX?: string,
+  userO?: string,
+  board: string[],
+};
+
 // test user
-class User {
+export class User {
   app: FirebaseApp;
   db: Firestore;
   functions: Functions;
@@ -45,51 +51,20 @@ class User {
     });
   };
 
-  loadGame = (id?: string) => {
-
-  }
+  subGame = (id: string, func: (game: TicTacToe) => any) => {
+    const gameDoc = doc(this.db, 'games/'+id);
+    onSnapshot(gameDoc, doc => {
+      const data = doc.data();
+      func(data as TicTacToe);
+    });
+  };
 
   cloudFunc = (name:string, args?:{}) => 
     httpsCallable(this.functions, name)(args)
-      .then(res => res.data as any)
+      .then(res => res.data as any);
+
   checkAuth = () => this.cloudFunc('checkAuth');
-  newGame = () => this.cloudFunc('newGame').then(data => data?.gameId as string);
-  placeMove = () => this.cloudFunc('placeMove');
-}
+  newGame = () => this.cloudFunc('newGame').then(data => data as {gameId: string});
+  placeMove = (pos: number) => this.cloudFunc('placeMove', {pos});
 
-class Game {
-  id: string;
-  db: Firestore;
-  
-  static async create(user: User, id?: string) {
-    const gameId = id || await user.newGame();
-    return new Game(user, gameId);
-  }
-
-  private constructor(user: User, gameId: string) {
-    this.id = gameId;
-    this.db = user.db;
-
-    // const gameId = id || await 
-  }
-}
-
-const userA = new User('userA');
-
-
-describe('user auth works', () => {
-  it ('should login', async () => {
-    await userA.authInit;
-  });
-  it ('checkAuth return uid', async () => {
-    await expect(userA.checkAuth()).resolves.toBeDefined();
-  });
-});
-
-describe('creates a new game', () => {
-  it('does a thing', () => {});
-});
-
-describe('does a move', () => {
-  it('does a thing', () => {});
-});
+};

@@ -46,12 +46,12 @@ const req = {
   },
 };
 
-// 
+// document structure
 interface TicTacToe {
-  userX: string,
-  userO: string,
+  userX?: string,
+  userO?: string,
   board: string[],
-}
+};
 
 export const checkAuth = onCall(async (args, context) => {
   const uid = req.auth(context);
@@ -60,6 +60,12 @@ export const checkAuth = onCall(async (args, context) => {
 
 export const newGame = onCall(async (args, context) => {
   const uid = req.auth(context);
+  const gameData: TicTacToe = {
+    userX: uid,
+    board: ['', '', '', '', '', '', '', '', ''],
+  }
+  const gameDoc = await db.collection('games').add(gameData);
+  return {gameId: gameDoc.id};
 });
 
 export const placeMove = onCall(async (args, context) => {

@@ -1,25 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
+import {useEffect, useState} from 'react';
+import {CircularProgress, Typography} from '@mui/material'
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import './App.css';
+import {User} from './firebase';
+import Game from './Game';
 
-function App() {
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
+const board = ['', 'X', '', '', 'O', '', '', '', 'X'];
+
+const App = () => {
+
+  const [user, setUser] = useState<User|null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const u = new User('user');
+      await u.authInit;
+      setUser(u);
+    }
+
+    if (!user)
+      loadUser();
+
+  }, [user])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={darkTheme}>
+      <div className="root">
+        <div className="app-page">
+          {!user ? 
+            <CircularProgress />
+           : <>
+            <Game user={user}/>
+            <Typography className="user-id">UserID: {user?.u?.uid}</Typography>
+           </>}
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }
 

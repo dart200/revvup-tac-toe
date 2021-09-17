@@ -1,0 +1,6 @@
+Features I might like to include:
+  - proper login support to rejoin games in progress
+  - animation to designate win
+  - dynamically scalable UI, right now the game-board is a state 600x600px
+  - potentially leader boards
+  - get TicTacToe type definition from centralized place
