@@ -19,12 +19,17 @@
     "firebase-functions": "^3.14.1"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^2.0.0",
+    "@types/jest": "^27.0.1",
     "@typescript-eslint/eslint-plugin": "^3.9.1",
     "@typescript-eslint/parser": "^3.8.0",
     "eslint": "^7.6.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.22.0",
+    "firebase": "^9.0.2",
     "firebase-functions-test": "^0.2.0",
+    "jest": "^27.2.0",
+    "ts-jest": "^27.0.5",
     "typescript": "^3.8.0"
   },
   "private": true
