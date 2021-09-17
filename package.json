@@ -1,0 +1,8 @@
+{
+  "name": "tic-tac-toe",
+  "version": "1.0.0",
+  "description": "play with two players!",
+  "main": "index.js",
+  "author": "Nicholas Swenson <dart200@gmail.com>",
+  "license": "MIT"
+}
