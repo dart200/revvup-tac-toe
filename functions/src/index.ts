@@ -75,13 +75,34 @@ export const newGame = onCall(async (args, context) => {
 export const joinGame = onCall(async (args, context) => {
   const uid = req.auth(context);
   const {gameId} = req.args(args, ['gameId']);
-
   const {gameRef, game} = await req.game(gameId);
+
   if (!game.userO)
     await gameRef.update({userO: uid});
 });
 
-export const placeMove = onCall(async (args, context) => {
+export const playMove = onCall(async (args, context) => {
+  const uid = req.auth(context);
+  const {gameId, pos} = req.args(args, ['gameId', 'pos']);
+  const {gameRef, game} = await req.game(gameId);
 
+  const player
+    = uid === game.userX ? 'X'
+    : uid === game.userO ? 'O'
+    : '';
+  if (!player)
+    throw error.auth();
+  
+  const numX = game?.board.filter(mark => mark === 'X').length;
+  const numO = game?.board.filter(mark => mark === 'O').length;
+  const turn = (numX === numO) ? 'X' : 'O';
+  if (turn !== player)
+    throw error.failed('Not your turn');
+  if (pos < 0 || 8 < pos)
+    throw error.arg('Position '+pos+' is out of bounds');
+
+  const board = game.board;
+  board[pos] = player;
+  await gameRef.update({board});
 });
 

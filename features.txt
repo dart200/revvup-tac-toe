@@ -1,7 +1,10 @@
 Features I might like to include:
-  - proper login support to rejoin games in progress
+  - proper login support, right now it just does anon logic, which lasts until you clear cookies
   - animation to designate win
-  - dynamically scalable UI, right now the game-board is a state 600x600px
-  - potentially leader boards
-  - get TicTacToe/User type definitions from centralized place
-  - missing error messages like game not found
+  - dynamically scalable UI, right now the game-board is a static 600x600px
+  - leader boards?
+  - get TicTacToe/User type definitions/utility code from centralized place instead of having them
+      copies between front end and back end;
+  - missing error messages on such as game not found
+  - scalability issues: this infrastructure will scale quite cheaply, though you probably would 
+      want login and creation limits to prevent someone from creating excess costs

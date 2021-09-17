@@ -3,8 +3,10 @@ import Button from '@mui/lab/LoadingButton';
 import AddCircle from '@mui/icons-material/AddCircle';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 
+
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 
 import {User, TicTacToe} from './firebase';
 
@@ -62,6 +64,17 @@ const Game = (args: {user: User}) => {
     })
   }
 
+  const genOnClickBox = (i: number) => () => {
+    if (turnOf !== playingAs) return;
+    const boardCpy = gameData?.board.slice()!;
+    boardCpy[i] = playingAs;
+    setGameData({
+      ...gameData,
+      board: boardCpy,
+    });
+    user.playMove(gameId, i);
+  };
+
   // minor game logic
   const [end, setEnd] = useState(false);
   const [full, setFull] = useState(false);
@@ -107,9 +120,15 @@ const Game = (args: {user: User}) => {
       </div>
       <div className="game-div">
         {gameData.board.map((mark, i) =>
-          <div key={mark+i} className="cell" onClick={() => console.log(mark)}>
+          <Box 
+            key={mark+i}
+            className="cell"
+            sx={{
+              ...!mark && (playingAs === turnOf) && {cursor: 'pointer'},
+            }}
+            onClick={!mark ? genOnClickBox(i) : undefined}>
             {mark &&<div className="mark">{mark}</div>}
-          </div>
+          </Box>
         )}
       </div>
     </>}
