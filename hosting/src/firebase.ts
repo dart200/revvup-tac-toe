@@ -70,6 +70,7 @@ export class User {
 
   checkAuth = () => this.cloudFunc('checkAuth');
   newGame = () => this.cloudFunc('newGame').then(data => data as {gameId: string});
+  joinGame = (gameId: string) => this.cloudFunc('joinGame', {gameId});
   placeMove = (pos: number) => this.cloudFunc('placeMove', {pos});
 
 };

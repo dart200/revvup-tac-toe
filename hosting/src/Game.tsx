@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import Button from '@mui/lab/LoadingButton';
 import AddCircle from '@mui/icons-material/AddCircle';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
@@ -43,19 +43,67 @@ const Game = (args: {user: User}) => {
     if (!joinId) return;
 
     setLoadingJoin(true);
-    user.subGame(joinId, (g: TicTacToe) => {
+    user.subGame(joinId, async (g: TicTacToe) => {
       console.log('on join snap', g);
-      setGameData(g);
-      setLoadingJoin(false);
+      if (!g) {
+        setJoinId('');
+        setLoadingJoin(false);
+        return;
+      };
+
+      if (user.u?.uid !== g.userX && !g.userO) {
+        user.joinGame(joinId);
+      } else {
+        setGameData(g);
+        setGameId(joinId);
+        setLoadingJoin(false);
+        setJoinId('');
+      }
     })
   }
+
+  // minor game logic
+  const [end, setEnd] = useState(false);
+  const [full, setFull] = useState(false);
+  const [turnOf, setTurnOf] = useState<'X'|'O'|''>('');
+  const [playingAs, setPlayingAs] = useState<'X'|'O'|''>('')
+  useEffect(() => {
+    if (!user || !gameData) return;
+
+    const uid = user.u?.uid;
+    if (gameData?.userX === uid)
+      setPlayingAs('X');
+    else if (gameData?.userO === uid)
+      setPlayingAs('O');
+    
+    const numX = gameData?.board.filter(mark => mark === 'X').length;
+    const numO = gameData?.board.filter(mark => mark === 'O').length;
+
+    if (numX === numO)
+      setTurnOf('X');
+    else
+      setTurnOf('O');
+    const won = false;
+    const full = gameData && !gameData.board.some(mark => !mark); 
+    const end = full || won;
+  }, [user, gameData])
 
   return <>
     {gameData && <>
       <div className="info-div">
         <Typography>GameID: {gameId}</Typography>
-        <Typography>Playing as X</Typography>
-        <Typography>Give your friend the GameID to start!</Typography>
+        <Typography>{(
+          playingAs === 'X' ? 'Playing as X'
+          : playingAs === 'O' || !gameData.userO ? 'Playing as O'
+          : 'Watching')
+        + (
+          playingAs === turnOf ? ', your move.'
+          : playingAs || !gameData.userO ? ', waiting on opponent.'
+          : ''
+        )}</Typography>
+        {playingAs === 'X' && !gameData.userO &&
+          <Typography>Give your friend the GameID to join!</Typography>
+        }
       </div>
       <div className="game-div">
         {gameData.board.map((mark, i) =>
@@ -79,7 +127,7 @@ const Game = (args: {user: User}) => {
         <Button 
           variant="contained"
           onClick={onJoinGame}
-          loading={loadingNew}
+          loading={loadingJoin}
           loadingPosition="start"
           startIcon={<VideogameAssetIcon />}
           disabled={false}>

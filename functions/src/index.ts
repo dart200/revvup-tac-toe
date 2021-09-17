@@ -20,7 +20,7 @@ const error = {
 };
 
 const req = {
-  args: (args: {[id: string]: any}, ...reqArgs: string[]) => {
+  args: (args: {[id: string]: any}, reqArgs: string[]) => {
     for (const argName of reqArgs) {
       if (typeof args[argName] === 'undefined')
         throw error.arg('Missing arg: '+argName);
@@ -34,16 +34,20 @@ const req = {
     return context.auth.uid;
   },
   doc: async (path: string) => {
-    const doc = await db.doc(path).get();
+    const ref = db.doc(path);
+    const doc = await ref.get();
 
     if (!doc.exists)
       throw error.failed('Missing doc: '+path);
     
-    return doc.data();
+    return {ref, doc};
   },
-  game: (id: string) => {
-    return req.doc('games/'+id).then(data => data as TicTacToe);
-  },
+  game: (id: string) =>
+    req.doc('games/'+id)
+      .then(({ref, doc}) => ({
+        gameRef: ref,
+        game: doc.data() as TicTacToe
+      })),
 };
 
 // document structure
@@ -66,6 +70,15 @@ export const newGame = onCall(async (args, context) => {
   }
   const gameDoc = await db.collection('games').add(gameData);
   return {gameId: gameDoc.id};
+});
+
+export const joinGame = onCall(async (args, context) => {
+  const uid = req.auth(context);
+  const {gameId} = req.args(args, ['gameId']);
+
+  const {gameRef, game} = await req.game(gameId);
+  if (!game.userO)
+    await gameRef.update({userO: uid});
 });
 
 export const placeMove = onCall(async (args, context) => {
