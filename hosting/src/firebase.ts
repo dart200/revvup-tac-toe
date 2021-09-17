@@ -31,7 +31,7 @@ export class User {
 
   unsubGame?: () => any;
 
-  constructor(name:string, emulator = true) {
+  constructor(name:string, emulator = process.env.NODE_ENV === 'development') {
     this.app = initializeApp(firebaseConfig, name);
     this.db = getFirestore(this.app);
     this.functions = getFunctions(this.app);
